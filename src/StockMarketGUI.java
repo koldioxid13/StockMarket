@@ -8,7 +8,7 @@ public class StockMarketGUI extends JFrame {
 
     public StockMarketGUI() {
         // --- 1. Huvudinställningar för fönstret ---
-        setTitle("Corporate Stock Exchange");
+        setTitle("Sigma Stocks Exchange");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 700);
         setLayout(new BorderLayout());
