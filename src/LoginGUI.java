@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class LoginGUI extends JFrame {
 
@@ -176,7 +177,9 @@ public class LoginGUI extends JFrame {
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
-                        statusLabel.setText(null);
+                        if (Objects.equals(statusLabel.getText(), statusText)) {
+                            statusLabel.setText(null);
+                        }
                     }
                 },
                 3000

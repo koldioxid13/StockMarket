@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.Objects;
 import java.util.Random;
 
 public class StockMarketGUI extends JFrame {
@@ -323,7 +324,9 @@ public class StockMarketGUI extends JFrame {
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
-                        statusLabel.setText(null);
+                        if (Objects.equals(statusLabel.getText(), statusText)) {
+                            statusLabel.setText(null);
+                        }
                     }
                 },
                 3000
