@@ -2,8 +2,28 @@ import java.nio.file.*;
 import java.io.IOException;
 import java.util.List;
 
-public class UserManager {
+public final class UserManager {
+    private static UserManager userManager = null;
+
+    private UserManager(){}
+
     private static final String USER_FILE = "users.txt";
+    private User currentUser;
+
+    public static UserManager getUserManager() {
+        if (userManager == null) {
+            userManager = new UserManager();
+        }
+        return userManager;
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(User currentUser) {
+        this.currentUser = currentUser;
+    }
 
     public boolean saveUser(User user) {
         try {

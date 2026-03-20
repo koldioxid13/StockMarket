@@ -13,6 +13,8 @@ public class StockMarketGUI extends JFrame {
         setSize(1000, 700);
         setLayout(new BorderLayout());
 
+        JLabel statusLabel;
+
         // Bakgrundsfärg för hela fönstret (något mörkare än själva panelen)
         getContentPane().setBackground(new Color(20, 20, 20));
 
@@ -29,6 +31,11 @@ public class StockMarketGUI extends JFrame {
 
         Font smallMono = new Font(Font.MONOSPACED, Font.PLAIN, 14);
 
+        // Användare
+        JLabel userLabel = new JLabel("Entity: " + UserManager.getUserManager().getCurrentUser().getUserName());
+        userLabel.setForeground(Color.LIGHT_GRAY);
+        userLabel.setFont(smallMono);
+
         JLabel cashLabel = new JLabel("Cash: $-1000");
         cashLabel.setForeground(Color.WHITE);
         cashLabel.setFont(smallMono);
@@ -37,8 +44,26 @@ public class StockMarketGUI extends JFrame {
         holdingsLabel.setForeground(Color.WHITE);
         holdingsLabel.setFont(smallMono);
 
+        // Utloggningsknapp
+        JButton logoutBtn = new JButton("LOGOUT");
+        logoutBtn.setForeground(Color.RED);
+        logoutBtn.setBackground(Color.BLACK);
+        logoutBtn.setFont(smallMono.deriveFont(Font.BOLD));
+        logoutBtn.setFocusPainted(false);
+        logoutBtn.setBorder(BorderFactory.createLineBorder(Color.RED, 1));
+        logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        logoutBtn.addActionListener(e -> {
+            UserManager.getUserManager().setCurrentUser(null);
+            this.dispose();
+            new LoginGUI();
+        });
+
+        // Lägger till allt i rad (hamnar till höger tack vare FlowLayout.RIGHT)
+        topPanel.add(userLabel);
         topPanel.add(cashLabel);
         topPanel.add(holdingsLabel);
+        topPanel.add(logoutBtn);
 
         marketPanel.add(topPanel, BorderLayout.NORTH);
 
@@ -203,8 +228,20 @@ public class StockMarketGUI extends JFrame {
         detailsScroll.setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50)));
         mainContentPanel.add(detailsScroll, gbcMain);
 
-        // -- Köp/Sälj Panel (Längst ner) --
+        // --- Status Label ---
         gbcMain.gridy = 2;
+        gbcMain.weighty = 0.05;
+        statusLabel = new JLabel(" ");
+        statusLabel.setForeground(Color.YELLOW);
+        statusLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        statusLabel.setPreferredSize(new Dimension(400, 30));
+        statusLabel.setMinimumSize(new Dimension(400, 30));
+        statusLabel.setMaximumSize(new Dimension(400, 30));
+        mainContentPanel.add(statusLabel, gbcMain);
+
+        // -- Köp/Sälj Panel (Längst ner) --
+        gbcMain.gridy = 3;
         gbcMain.weighty = 0.2;
         JPanel actionPanel = new JPanel(new GridLayout(2, 1, 5, 5)); // Två rader
         actionPanel.setOpaque(false);
@@ -278,6 +315,19 @@ public class StockMarketGUI extends JFrame {
         btn.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
         btn.setBorderPainted(false);
         panel.add(btn);
+    }
+
+    private void setStatus(String statusText, JLabel statusLabel) {
+        statusLabel.setText(statusText);
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        statusLabel.setText(null);
+                    }
+                },
+                3000
+        );
     }
 
     // --- Egen panelklass för att rita kurvdiagrammet ---
