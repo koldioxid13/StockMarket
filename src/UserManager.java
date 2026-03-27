@@ -9,6 +9,7 @@ public final class UserManager {
 
     private static final String USER_FILE = "users.txt";
     private User currentUser;
+    private User[] allUsers;
 
     public static UserManager getUserManager() {
         if (userManager == null) {

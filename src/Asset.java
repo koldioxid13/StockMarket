@@ -1,14 +1,14 @@
 public class Asset {
-    private User user;
+    private String user;
     private String buyDate;
     private Double buyPrice;
     private Tradable tradable;
 
-    public User getUser() {
+    public String getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -37,7 +37,7 @@ public class Asset {
     }
 
     public String toFileFormat() {
-        return "User:" + user.getUserName() +
+        return "User:" + user +
                 " | BuyDate:" + buyDate +
                 " | BuyPrice:" + buyPrice +
                 " | Tradable:" + tradable.getName();
