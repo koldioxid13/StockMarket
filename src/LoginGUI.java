@@ -98,6 +98,7 @@ public class LoginGUI extends JFrame {
             String isValid = Authenticator.getAuthenticator().isValidUser(newUser);
 
             if (isValid.equals("valid")) {
+                newUser.setCash(UserManager.getUserManager().getUserCash(newUser));
                 UserManager.getUserManager().setCurrentUser(newUser);
                 this.dispose();
                 new StockMarketGUI();

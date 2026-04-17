@@ -37,7 +37,7 @@ public class StockMarketGUI extends JFrame {
         userLabel.setForeground(Color.LIGHT_GRAY);
         userLabel.setFont(smallMono);
 
-        JLabel cashLabel = new JLabel("Cash: $-1000");
+        JLabel cashLabel = new JLabel("Cash: $" + UserManager.getUserManager().getCurrentUser().getCash());
         cashLabel.setForeground(Color.WHITE);
         cashLabel.setFont(smallMono);
 

@@ -23,7 +23,7 @@ public final class Authenticator {
 
             for (String line : lines) {
                 String[] parts = line.split("\\|");
-                if (parts.length == 2) {
+                if (parts.length == 3) {
                     String storedName = parts[0];
                     String storedPass = parts[1];
 

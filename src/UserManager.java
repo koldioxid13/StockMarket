@@ -37,7 +37,7 @@ public final class UserManager {
                     return false;
                 }
             }
-            String userLine = user.getUserName() + "|" + user.getPassword() + System.lineSeparator();
+            String userLine = user.getUserName() + "|" + user.getPassword() + "|" + user.getCash() + System.lineSeparator();
             Files.write(
                     Paths.get(USER_FILE),
                     userLine.getBytes(),
@@ -52,5 +52,28 @@ public final class UserManager {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public String getUserCash(User user) {
+        try {
+            if (!Files.exists(Paths.get(USER_FILE))) return "0";
+
+            List<String> lines = Files.readAllLines(Paths.get(USER_FILE));
+
+            for (String line : lines) {
+                String[] parts = line.split("\\|");
+                if (parts.length == 3) {
+                    String storedName = parts[0];
+                    String storedCash = parts[2];
+
+                    if (storedName.equals(user.getUserName())) {
+                        return storedCash;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "0";
     }
 }

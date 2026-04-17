@@ -1,6 +1,7 @@
 public class User {
     private String userName;
     private String password;
+    private String cash = "0";
 
     public User(String userName, String password) {
         this.userName = userName;
@@ -21,5 +22,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getCash() {
+        return cash;
+    }
+
+    public void setCash(String cash) {
+        this.cash = cash;
     }
 }
