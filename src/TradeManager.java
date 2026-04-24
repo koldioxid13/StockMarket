@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -21,31 +19,71 @@ public final class TradeManager {
         return tradeManager;
     }
 
-    public String buyTradable(Tradable tradable) {
+    public String buyAsset(Tradable tradable) {
+        User currentUser = UserManager.getUserManager().getCurrentUser();
+        Asset asset = new Asset();
+        asset.setUser(currentUser.getUserName());
+        asset.setBuyDate(java.time.LocalDateTime.now().toString());
+        asset.setBuyPrice(tradable.getPrice());
+        asset.setTradable(tradable);
+
+        if (asset.getBuyPrice() <= currentUser.getCash()) {
+            if (tradable.getAmountLeft() > 0) {
+                try {
+                    currentUser.setCash(currentUser.getCash() - asset.getBuyPrice());
+
+                    String line = asset.toFileFormat() + System.lineSeparator();
+
+                    Files.write(
+                            Paths.get(ASSETS_FILE),
+                            line.getBytes(),
+                            StandardOpenOption.CREATE,
+                            StandardOpenOption.APPEND
+                    );
+                    System.out.println("Köpet sparades i " + ASSETS_FILE);
+                    return "success";
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "error";
+                }
+            } else {
+                return "noAmount";
+            }
+        } else {
+            return "noCash";
+        }
+    }
+
+    public void SellAsset(Asset asset) {
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(ASSETS_FILE));
+            User currentUser = UserManager.getUserManager().getCurrentUser();
+            currentUser.setCash(currentUser.getCash() + asset.getTradable().getPrice());
+
+            File inputFile = new File(ASSETS_FILE);
+            File tempFile = new File("temp_assets.txt");
+
+            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
             String currentLine;
+
             while((currentLine = reader.readLine()) != null) {
                 // trim newline when comparing with lineToRemove
                 String trimmedLine = currentLine.trim();
-                if(trimmedLine.contains(loan.getUser().getUserName()) && trimmedLine.contains(loan.getBook().getTitle())) {
-                    reader.close();
-                    return false;
-                }
+                if(trimmedLine.contains(asset.getUser()) && trimmedLine.contains(asset.getTradable().getName())) continue;
+                writer.write(currentLine + System.getProperty("line.separator"));
             }
+            writer.close();
             reader.close();
-            String line = loan.toFileFormat() + System.lineSeparator();
-
-            Files.write(
-                    Paths.get(LOAN_FILE),
-                    line.getBytes(),
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND
-            );
-            System.out.println("Lånet sparades i " + LOAN_FILE);
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (inputFile.delete()) {
+                if (tempFile.renameTo(inputFile)){
+                    System.out.println("Asset togs bort från " + ASSETS_FILE);
+                }
+            } else {
+                System.out.println("Error");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return true;
     }
 }

@@ -1,8 +1,8 @@
 public abstract class Tradable {
     String name;
-    String price;
-    String totalAmount;
-    String amountLeft;
+    Double price;
+    Double totalAmount;
+    Double amountLeft;
 
     public String getName() {
         return name;
@@ -12,27 +12,27 @@ public abstract class Tradable {
         this.name = name;
     }
 
-    public String getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public String getTotalAmount() {
+    public Double getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(String totalAmount) {
+    public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
     }
 
-    public String getAmountLeft() {
+    public Double getAmountLeft() {
         return amountLeft;
     }
 
-    public void setAmountLeft(String amountLeft) {
+    public void setAmountLeft(Double amountLeft) {
         this.amountLeft = amountLeft;
     }
 }

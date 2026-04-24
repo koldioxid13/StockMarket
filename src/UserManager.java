@@ -54,9 +54,9 @@ public final class UserManager {
         }
     }
 
-    public String getUserCash(User user) {
+    public Double getUserCash(User user) {
         try {
-            if (!Files.exists(Paths.get(USER_FILE))) return "0";
+            if (!Files.exists(Paths.get(USER_FILE))) return 0.0;
 
             List<String> lines = Files.readAllLines(Paths.get(USER_FILE));
 
@@ -64,7 +64,7 @@ public final class UserManager {
                 String[] parts = line.split("\\|");
                 if (parts.length == 3) {
                     String storedName = parts[0];
-                    String storedCash = parts[2];
+                    Double storedCash = Double.valueOf(parts[2]);
 
                     if (storedName.equals(user.getUserName())) {
                         return storedCash;
@@ -74,6 +74,6 @@ public final class UserManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "0";
+        return 0.0;
     }
 }

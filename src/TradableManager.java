@@ -33,9 +33,9 @@ public final class TradableManager {
                 String[] details = part.split(":");
 
                 if (details[0].contains("Name")) tradable.setName(details[1].trim());
-                if (details[0].contains("Price")) tradable.setPrice(details[1].trim());
-                if (details[0].contains("TotalAmount")) tradable.setTotalAmount(details[1].trim());
-                if (details[0].contains("AmountLeft")) tradable.setAmountLeft(details[1].trim());
+                if (details[0].contains("Price")) tradable.setPrice(Double.parseDouble(details[1].trim()));
+                if (details[0].contains("TotalAmount")) tradable.setTotalAmount(Double.parseDouble(details[1].trim()));
+                if (details[0].contains("AmountLeft")) tradable.setAmountLeft(Double.parseDouble(details[1].trim()));
             }
 
             this.tradables[i] = tradable;

@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.Objects;
 import java.util.Random;
 
@@ -248,11 +249,29 @@ public class StockMarketGUI extends JFrame {
         actionPanel.setOpaque(false);
 
         // Köp-rad
-        JPanel buyRow = createActionRow("Buy", Color.GREEN);
+        JPanel buyRow = createActionRow("Buy", Color.GREEN, e -> {
+            // Tar reda på vilken knapp som klickades (t.ex. "5" eller "10")
+            JButton clickedButton = (JButton) e.getSource();
+            String amount = clickedButton.getText();
+
+     //       TradeManager.getTradeManager().buyAsset(Sigma);
+            try {
+                TradableManager.getTradableManager().getTradables();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+            System.out.println("KÖPER: " + amount + " st");
+        });
         actionPanel.add(buyRow);
 
         // Sälj-rad
-        JPanel sellRow = createActionRow("Sell", Color.RED);
+        JPanel sellRow = createActionRow("Sell", Color.RED, e -> {
+            JButton clickedButton = (JButton) e.getSource();
+            String amount = clickedButton.getText();
+
+            // TODO: Här lägger du in logiken för att SÄLJA.
+            System.out.println("SÄLJER: " + amount + " st");
+        });
         actionPanel.add(sellRow);
 
         mainContentPanel.add(actionPanel, gbcMain);
@@ -283,8 +302,7 @@ public class StockMarketGUI extends JFrame {
         return btn;
     }
 
-    // --- Hjälpmetod för att skapa en Köp/Sälj-rad ---
-    private JPanel createActionRow(String labelText, Color color) {
+    private JPanel createActionRow(String labelText, Color color, ActionListener action) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         row.setOpaque(false);
 
@@ -293,28 +311,33 @@ public class StockMarketGUI extends JFrame {
         label.setFont(new Font(Font.MONOSPACED, Font.BOLD, 18));
         row.add(label);
 
-        // Vertikalt streck (simulerat)
         row.add(new JLabel(" | "));
 
-        // Mängdknappar
-        addQuantityButton(row, "1", color);
-        addQuantityButton(row, "2", color);
-        addQuantityButton(row, "5", color);
-        addQuantityButton(row, "10", color);
-        addQuantityButton(row, "100", color);
+        // Skickar med action till alla knappar
+        addQuantityButton(row, "1", color, action);
+        addQuantityButton(row, "2", color, action);
+        addQuantityButton(row, "5", color, action);
+        addQuantityButton(row, "10", color, action);
+        addQuantityButton(row, "100", color, action);
 
         return row;
     }
 
     // --- Hjälpmetod för att skapa mängdknappar ---
-    private void addQuantityButton(JPanel panel, String text, Color color) {
+    private void addQuantityButton(JPanel panel, String text, Color color, ActionListener action) {
         JButton btn = new JButton(text);
         btn.setForeground(color);
         btn.setBackground(Color.BLACK);
-        btn.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Ta bort kant
+        btn.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         btn.setFocusPainted(false);
         btn.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
         btn.setBorderPainted(false);
+
+        // --- HÄR LÄGGS LYSSNAREN TILL ---
+        if (action != null) {
+            btn.addActionListener(action);
+        }
+
         panel.add(btn);
     }
 
