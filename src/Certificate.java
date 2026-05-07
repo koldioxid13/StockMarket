@@ -1,2 +1,2 @@
-public class Certificate {
+public class Certificate extends Tradable {
 }

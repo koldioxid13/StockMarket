@@ -1,0 +1,2 @@
+Name:Max Hamburgare | Description:Sveriges godaste hamburgare | Type:Stock | Price:100 | TotalAmount:50 | AmountLeft:50
+Name:Bull x10 Max Hamburgare | Type:Certificate | Price:150 | TotalAmount:100 | AmountLeft:100

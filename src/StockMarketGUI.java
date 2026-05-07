@@ -3,10 +3,19 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class StockMarketGUI extends JFrame {
+    private Map<String, List<Tradable>> groupedTradables = new HashMap<>();
+    private String currentCategory = "";
+    private JPanel tabBar; // Flytta ut tabBar så vi kan rensa den
+    private DefaultTableModel tableModel;
+    JLabel statusLabel = new JLabel(" ");
+    private JTextArea detailsArea;
+    private ChartPanel chartPanel;
+    private JTable stockTable;
 
     public StockMarketGUI() {
         // --- 1. Huvudinställningar för fönstret ---
@@ -14,8 +23,6 @@ public class StockMarketGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 700);
         setLayout(new BorderLayout());
-
-        JLabel statusLabel;
 
         // Bakgrundsfärg för hela fönstret (något mörkare än själva panelen)
         getContentPane().setBackground(new Color(20, 20, 20));
@@ -84,50 +91,24 @@ public class StockMarketGUI extends JFrame {
         JPanel leftSidebar = new JPanel(new BorderLayout());
         leftSidebar.setOpaque(false);
 
-        // -- Flikar (simulerade) --
-        JPanel tabBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        // -- Flikar (Nu dynamiska) --
+        tabBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         tabBar.setOpaque(false);
-
-        JButton stocksBtn = createTabButton("Stocks", true);
-        JButton partsBtn = createTabButton("Parts", false);
-        JButton fishBtn = createTabButton("Fish", false);
-
-        tabBar.add(stocksBtn);
-        tabBar.add(partsBtn);
-        tabBar.add(fishBtn);
-
         leftSidebar.add(tabBar, BorderLayout.NORTH);
 
         // -- Aktielista --
         String[] columns = {" ", "Ticker", "Value"};
-        DefaultTableModel tableModel = new DefaultTableModel(columns, 0) {
+        tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Ingen redigering
+                return false;
             }
         };
 
-        // Hårdkodad data från bilden
-        addStockRow(tableModel, "BRN", 0);
-        addStockRow(tableModel, "AUGB", 0);
-        addStockRow(tableModel, "PSYB", 0);
-        addStockRow(tableModel, "WRMB", 0);
-        addStockRow(tableModel, "LIVR", 0.3);
-        addStockRow(tableModel, "TLVR", -0.1);
-        addStockRow(tableModel, "KDNY", 0);
-        addStockRow(tableModel, "HERT", 0.1);
-        addStockRow(tableModel, "BHRT", 0.1);
-        addStockRow(tableModel, "INTS", -0.2);
-        addStockRow(tableModel, "PINT", 0.1);
-        addStockRow(tableModel, "APNX", 0.1);
-        addStockRow(tableModel, "SPNE", 0);
-        addStockRow(tableModel, "RSPN", -0.1);
-        addStockRow(tableModel, "GUT", 0);
-        addStockRow(tableModel, "NGUT", 0);
-        addStockRow(tableModel, "PNCR", 0);
-        addStockRow(tableModel, "ADVP", 0);
+        // Laddar data från din TradableManager
+        loadMarketData();
 
-        JTable stockTable = new JTable(tableModel);
+        stockTable = new JTable(tableModel);
         stockTable.setOpaque(false);
         stockTable.setBackground(Color.BLACK);
 
@@ -203,79 +184,81 @@ public class StockMarketGUI extends JFrame {
         gbcMain.insets = new Insets(0, 5, 0, 5); // Marginaler
         gbcMain.weightx = 1.0;
 
-        // -- Simulerat Kurvdiagram --
+        // -- Diagram --
         gbcMain.gridy = 0;
-        gbcMain.weighty = 0.6; // Tar upp mest plats
-        gbcMain.gridheight = 1;
-        ChartPanel chartPanel = new ChartPanel(); // Egen klass definierad nedan
+        gbcMain.weighty = 0.6;
+        chartPanel = new ChartPanel(); // Nu utan typ-prefix
         mainContentPanel.add(chartPanel, gbcMain);
 
-        // -- Detaljtext area --
+        // -- Detaljtext --
         gbcMain.gridy = 1;
         gbcMain.weighty = 0.2;
-        String detailsText = "Steady bluechip company in the security business.\n" +
-                "(0)Cruelty Squad\n" +
-                "Price: $1240.216143 0.26%\n" +
-                "MKC: $3612516463.279987";
-        JTextArea detailsArea = new JTextArea(detailsText);
+        detailsArea = new JTextArea("SELECT AN ENTITY TO VIEW DATA INTERCEPT.");
         detailsArea.setEditable(false);
         detailsArea.setBackground(Color.BLACK);
         detailsArea.setForeground(Color.WHITE);
-        detailsArea.setLineWrap(true);
-        detailsArea.setWrapStyleWord(true);
-        detailsArea.setFont(stockFont);
-        detailsArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15)); // Padding
+        detailsArea.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14));
+        detailsArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JScrollPane detailsScroll = new JScrollPane(detailsArea);
         detailsScroll.setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50)));
         mainContentPanel.add(detailsScroll, gbcMain);
 
-        // --- Status Label ---
-        gbcMain.gridy = 2;
-        gbcMain.weighty = 0.05;
-        statusLabel = new JLabel(" ");
-        statusLabel.setForeground(Color.YELLOW);
-        statusLabel.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
-        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        statusLabel.setPreferredSize(new Dimension(400, 30));
-        statusLabel.setMinimumSize(new Dimension(400, 30));
-        statusLabel.setMaximumSize(new Dimension(400, 30));
-        mainContentPanel.add(statusLabel, gbcMain);
-
-        // -- Köp/Sälj Panel (Längst ner) --
-        gbcMain.gridy = 3;
-        gbcMain.weighty = 0.2;
-        JPanel actionPanel = new JPanel(new GridLayout(2, 1, 5, 5)); // Två rader
+        // -- Action Panel (Köp/Sälj/Status) --
+        JPanel actionPanel = new JPanel();
         actionPanel.setOpaque(false);
+        actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
 
         // Köp-rad
-        JPanel buyRow = createActionRow("Buy", Color.GREEN, e -> {
-            // Tar reda på vilken knapp som klickades (t.ex. "5" eller "10")
-            JButton clickedButton = (JButton) e.getSource();
-            String amount = clickedButton.getText();
-
-     //       TradeManager.getTradeManager().buyAsset(Sigma);
-            try {
-                TradableManager.getTradableManager().getTradables();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-            System.out.println("KÖPER: " + amount + " st");
+        JPanel buyRow = createActionRow("Buy ", Color.GREEN, e -> {
+            JButton btn = (JButton)e.getSource();
+            setStatus("ORDER EXECUTED: Bought " + btn.getText() + " units", statusLabel);
         });
-        actionPanel.add(buyRow);
 
         // Sälj-rad
         JPanel sellRow = createActionRow("Sell", Color.RED, e -> {
-            JButton clickedButton = (JButton) e.getSource();
-            String amount = clickedButton.getText();
-
-            // TODO: Här lägger du in logiken för att SÄLJA.
-            System.out.println("SÄLJER: " + amount + " st");
+            JButton btn = (JButton)e.getSource();
+            setStatus("ORDER EXECUTED: Sold " + btn.getText() + " units", statusLabel);
         });
-        actionPanel.add(sellRow);
 
+        statusLabel.setForeground(Color.YELLOW);
+        statusLabel.setFont(smallMono);
+        statusLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        actionPanel.add(buyRow);
+        actionPanel.add(sellRow);
+        actionPanel.add(Box.createVerticalStrut(10));
+        actionPanel.add(statusLabel);
+
+        gbcMain.gridy = 2;
+        gbcMain.weighty = 0.2; // Ger plats åt knapparna längst ner
         mainContentPanel.add(actionPanel, gbcMain);
 
+        stockTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = stockTable.getSelectedRow();
+                if (row != -1) {
+                    String ticker = (String) tableModel.getValueAt(row, 1);
+                    // Hitta objektet i vår mapp
+                    Tradable selected = groupedTradables.get(currentCategory).stream()
+                            .filter(t -> t.getName().equals(ticker))
+                            .findFirst().orElse(null);
+
+                    if (selected != null) {
+                        // Uppdatera texten
+                        detailsArea.setText(
+                                "ENTITY: " + selected.getName() + " [" + selected.getType() + "]\n" +
+                                        "VALUE: $" + String.format("%.2f", selected.getPrice()) + "\n\n" +
+                                        selected.getDescription()
+                        );
+                        // Uppdatera grafen
+                        chartPanel.updateData(selected.getPriceHistory());
+                    }
+                }
+            }
+        });
+
+        gbc.gridx = 1; // Flytta till höger kolumn
         contentArea.add(mainContentPanel, gbc);
 
         marketPanel.add(contentArea, BorderLayout.CENTER);
@@ -356,55 +339,93 @@ public class StockMarketGUI extends JFrame {
         );
     }
 
-    // --- Egen panelklass för att rita kurvdiagrammet ---
+    private void loadMarketData() {
+        try {
+            Tradable[] allTradables = TradableManager.getTradableManager().getTradables();
+
+            // Gruppera objekten efter deras klassnamn (t.ex. "Stock", "Fish")
+            groupedTradables = Arrays.stream(allTradables)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.groupingBy(Tradable::getType));
+
+            updateTabs();
+
+            // Visa första kategorin som standard
+            if (!groupedTradables.isEmpty()) {
+                showCategory(groupedTradables.keySet().iterator().next());
+            }
+        } catch (Exception e) {
+            setStatus("ERROR LOADING DATA", statusLabel);
+        }
+    }
+
+    private void updateTabs() {
+        tabBar.removeAll();
+        for (String category : groupedTradables.keySet()) {
+            JButton tabBtn = createTabButton(category, category.equals(currentCategory));
+            tabBtn.addActionListener(e -> showCategory(category));
+            tabBar.add(tabBtn);
+        }
+        tabBar.revalidate();
+        tabBar.repaint();
+    }
+
+    private void showCategory(String category) {
+        currentCategory = category;
+        tableModel.setRowCount(0); // Rensa tabellen
+
+        List<Tradable> items = groupedTradables.get(category);
+        if (items != null) {
+            for (Tradable t : items) {
+                // Vi använder t.getName() och t.getPrice() från din Tradable-klass
+                tableModel.addRow(new Object[]{"", t.getName(), String.valueOf(t.getPrice())});
+            }
+        }
+        updateTabs(); // Uppdatera utseendet på flikarna (vilken som är aktiv)
+    }
+
     private class ChartPanel extends JPanel {
+        private List<Double> history = new ArrayList<>();
+
         public ChartPanel() {
             setBackground(Color.BLACK);
-            setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50)));
+            setOpaque(true);
+            setPreferredSize(new Dimension(400, 300));
+        }
+
+        public void updateData(List<Double> newHistory) {
+            this.history = newHistory;
+            repaint();
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
-
-            // Gör linjerna lite tydligare
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setStroke(new BasicStroke(2.0f));
-
-            int w = getWidth();
-            int h = getHeight();
-            int margin = 30; // Marginal från kanterna
-            int chartWidth = w - 2 * margin;
-            int chartHeight = h - 2 * margin;
-
-            // Generera statiska, slumpmässiga punkter för diagrammet
-            int numPoints = 80;
-            int[] xPoints = new int[numPoints];
-            int[] yPoints = new int[numPoints];
-
-            Random rand = new Random(42); // Fast seed för att grafen inte ska ändras
-            int currentY = chartHeight / 2;
-            for (int i = 0; i < numPoints; i++) {
-                xPoints[i] = margin + (i * chartWidth) / (numPoints - 1);
-                int delta = rand.nextInt(31) - 15; // -15 till +15
-                currentY += delta;
-
-                // Håll punkterna inom diagramytan
-                if (currentY < margin) currentY = margin;
-                if (currentY > margin + chartHeight) currentY = margin + chartHeight;
-                yPoints[i] = currentY;
+            if (history == null || history.size() < 2) {
+                g.setColor(Color.DARK_GRAY);
+                g.drawString("Awaiting market data...", 20, 30);
+                return;
             }
 
-            // Rita linjerna med skiftande färger för att simulera kurvan
-            for (int i = 1; i < numPoints; i++) {
-                // Om värdet går upp (lägre Y i Swing-koordinater), visa rött, annars grönt
-                if (yPoints[i] < yPoints[i-1]) {
-                    g2.setColor(Color.GREEN); // Uppgång (visuellt högre värde)
-                } else {
-                    g2.setColor(Color.RED); // Nedgång
-                }
-                g2.drawLine(xPoints[i-1], yPoints[i-1], xPoints[i], yPoints[i]);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            double maxPrice = history.stream().max(Double::compare).orElse(1.0);
+            double minPrice = history.stream().min(Double::compare).orElse(0.0);
+            double range = Math.max(maxPrice - minPrice, 1.0);
+
+            int padding = 20;
+            int w = getWidth() - 2 * padding;
+            int h = getHeight() - 2 * padding;
+
+            for (int i = 1; i < history.size(); i++) {
+                int x1 = padding + (i - 1) * w / (history.size() - 1);
+                int y1 = (getHeight() - padding) - (int) ((history.get(i - 1) - minPrice) / range * h);
+                int x2 = padding + i * w / (history.size() - 1);
+                int y2 = (getHeight() - padding) - (int) ((history.get(i) - minPrice) / range * h);
+
+                g2.setColor(history.get(i) >= history.get(i - 1) ? Color.GREEN : Color.RED);
+                g2.drawLine(x1, y1, x2, y2);
             }
         }
     }

@@ -1,2 +1,2 @@
-public class Stock {
+public class Stock extends Tradable {
 }

@@ -27,16 +27,46 @@ public final class TradableManager {
             if (lines[i].trim().isEmpty()) continue;
 
             String[] parts = lines[i].split("\\|");
-            Tradable tradable = new Tradable(){};
+
+            String name = "";
+            String type = "";
+            String description = "";
+            Double price = 0.0;
+            Double totalAmount = 0.0;
+            Double amountLeft = 0.0;
 
             for (String part : parts) {
                 String[] details = part.split(":");
 
-                if (details[0].contains("Name")) tradable.setName(details[1].trim());
-                if (details[0].contains("Price")) tradable.setPrice(Double.parseDouble(details[1].trim()));
-                if (details[0].contains("TotalAmount")) tradable.setTotalAmount(Double.parseDouble(details[1].trim()));
-                if (details[0].contains("AmountLeft")) tradable.setAmountLeft(Double.parseDouble(details[1].trim()));
+                if (details[0].contains("Name")) name = details[1].trim();
+                if (details[0].contains("Type")) type = details[1].trim();
+                if (details[0].contains("Description")) description = details[1].trim();
+                if (details[0].contains("Price")) price = Double.parseDouble(details[1].trim());
+                if (details[0].contains("TotalAmount")) totalAmount = Double.parseDouble(details[1].trim());
+                if (details[0].contains("AmountLeft")) amountLeft = Double.parseDouble(details[1].trim());
             }
+
+            Tradable tradable;
+
+            switch(type) {
+                case "Stock":
+                    tradable = new Stock();
+                    break;
+                case "Certificate":
+                    tradable = new Certificate();
+                    break;
+                default:
+                    tradable = new Tradable(){};
+                    break;
+            }
+
+            tradable.setName(name);
+            tradable.setType(type);
+            tradable.setDescription(description);
+            tradable.setPrice(price);
+            tradable.addToPriceHistory(price);
+            tradable.setTotalAmount(totalAmount);
+            tradable.setAmountLeft(amountLeft);
 
             this.tradables[i] = tradable;
         }
