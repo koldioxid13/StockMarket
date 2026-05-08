@@ -2,6 +2,7 @@ public class User {
     private String userName;
     private String password;
     private Double cash = 0.0;
+    private Asset[] assets;
 
     public User(String userName, String password) {
         this.userName = userName;
@@ -30,5 +31,13 @@ public class User {
 
     public void setCash(Double cash) {
         this.cash = cash;
+    }
+
+    public Asset[] getAssets() {
+        return assets;
+    }
+
+    public void setAssets(Asset[] assets) {
+        this.assets = assets;
     }
 }

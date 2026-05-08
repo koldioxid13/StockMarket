@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Tradable {
@@ -8,7 +9,7 @@ public abstract class Tradable {
     Double totalAmount;
     Double amountLeft;
 
-    List<Double> priceHistory;
+    private List<Double> priceHistory = new ArrayList<>();
 
     public String getName() {
         return name;

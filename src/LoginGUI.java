@@ -179,7 +179,7 @@ public class LoginGUI extends JFrame {
                     @Override
                     public void run() {
                         if (Objects.equals(statusLabel.getText(), statusText)) {
-                            statusLabel.setText(null);
+                            statusLabel.setText(" ");
                         }
                     }
                 },

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.file.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class AssetManager {
@@ -8,7 +9,7 @@ public final class AssetManager {
     private AssetManager(){}
 
     private static final String ASSET_FILE = "assets.txt";
-    private Asset[] assets;
+    private ArrayList<Asset> assets;
 
     public static AssetManager getAssetManager() {
         if (assetManager == null) {
@@ -21,10 +22,17 @@ public final class AssetManager {
         return Files.readString(Path.of(ASSET_FILE));
     }
 
-    public Asset[] getAssets() throws Exception {
+    public ArrayList<Asset> getAssets() {
+        return assets;
+    }
+
+    public void setAssets(ArrayList<Asset> assets) {
+        this.assets = assets;
+    }
+
+    public void setAssetsFromFile() throws Exception {
         String content = loadText();
         String[] lines = content.split("\n");
-        this.assets = new Asset[lines.length];
 
         for (int i = 0; i < lines.length; i++) {
             if (lines[i].trim().isEmpty()) continue;
@@ -43,10 +51,30 @@ public final class AssetManager {
                     asset.setTradable(results.getFirst());
                 }
             }
-
-            this.assets[i] = asset;
+            this.assets.set(i, asset);
         }
-        return assets;
+    }
+
+    public ArrayList<Asset> getUserAsset(String wantedAsset) throws Exception {
+        ArrayList<Asset> allAssets = getUserAssets();
+        ArrayList<Asset> wantedAssets = new ArrayList<>();
+        for (int i = 0; i < allAssets.size(); i++) {
+            if (allAssets.get(i).getTradable().getName().equals(wantedAsset)) {
+                wantedAssets.set(i, allAssets.get(i));
+            }
+        }
+        return wantedAssets;
+    }
+
+    public ArrayList<Asset> getUserAssets() throws Exception {
+        ArrayList<Asset> allAssets = getAssets();
+        ArrayList<Asset> wantedAssets = new ArrayList<>();
+        for (int i = 0; i < allAssets.size(); i++) {
+            if (allAssets.get(i).getUser().equals(UserManager.getUserManager().getCurrentUser().getUserName())) {
+                wantedAssets.set(i, allAssets.get(i));
+            }
+        }
+        return wantedAssets;
     }
 
     public boolean saveAsset(Asset asset) {
@@ -71,6 +99,8 @@ public final class AssetManager {
                     StandardOpenOption.APPEND
             );
             System.out.println("The asset was saved to " + ASSET_FILE);
+
+            this.assets.add(asset);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,6 +128,7 @@ public final class AssetManager {
             if (inputFile.delete()) {
                 if (tempFile.renameTo(inputFile)){
                     System.out.println("Asset was removed from " + ASSET_FILE);
+                    this.assets.remove(asset);
                 }
             } else {
                 System.out.println("Error");
@@ -105,9 +136,5 @@ public final class AssetManager {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void setAssets(Asset[] assets) {
-        this.assets = assets;
     }
 }

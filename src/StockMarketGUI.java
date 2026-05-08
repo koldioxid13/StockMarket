@@ -97,7 +97,7 @@ public class StockMarketGUI extends JFrame {
         leftSidebar.add(tabBar, BorderLayout.NORTH);
 
         // -- Aktielista --
-        String[] columns = {" ", "Ticker", "Value"};
+        String[] columns = {" ", "Ticker", "Price"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -186,19 +186,19 @@ public class StockMarketGUI extends JFrame {
 
         // -- Diagram --
         gbcMain.gridy = 0;
-        gbcMain.weighty = 0.6;
+        gbcMain.weighty = 0.4;
         chartPanel = new ChartPanel(); // Nu utan typ-prefix
         mainContentPanel.add(chartPanel, gbcMain);
 
         // -- Detaljtext --
         gbcMain.gridy = 1;
-        gbcMain.weighty = 0.2;
+        gbcMain.weighty = 0.4;
         detailsArea = new JTextArea("SELECT AN ENTITY TO VIEW DATA INTERCEPT.");
         detailsArea.setEditable(false);
         detailsArea.setBackground(Color.BLACK);
         detailsArea.setForeground(Color.WHITE);
         detailsArea.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14));
-        detailsArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        detailsArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 5, 15));
 
         JScrollPane detailsScroll = new JScrollPane(detailsArea);
         detailsScroll.setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50)));
@@ -224,6 +224,8 @@ public class StockMarketGUI extends JFrame {
         statusLabel.setForeground(Color.YELLOW);
         statusLabel.setFont(smallMono);
         statusLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statusLabel.setPreferredSize(new Dimension(400, 25));
+        statusLabel.setMinimumSize(new Dimension(400, 25));
 
         actionPanel.add(buyRow);
         actionPanel.add(sellRow);
@@ -246,13 +248,23 @@ public class StockMarketGUI extends JFrame {
 
                     if (selected != null) {
                         // Uppdatera texten
-                        detailsArea.setText(
-                                "ENTITY: " + selected.getName() + " [" + selected.getType() + "]\n" +
-                                        "VALUE: $" + String.format("%.2f", selected.getPrice()) + "\n\n" +
-                                        selected.getDescription()
-                        );
+                        try {
+                            detailsArea.setText(
+                                    "ENTITY: " + selected.getName() + "\n\n" +
+                                            "PRICE: $" + String.format("%.2f", selected.getPrice()) + "\n" +
+                                            "MARKET CAP: $" + String.format("%.2f", selected.getPrice() * selected.getTotalAmount()) + "\n" +
+                                            "TOTAL AMOUNT: " + String.format("%.2f", selected.getTotalAmount()) + "\n" +
+                                            "BUYABLE AMOUNT: " + String.format("%.2f", selected.getAmountLeft()) + "\n\n" +
+                                            "AMOUNT OWNED: " + AssetManager.getAssetManager().getAsset(selected.getName()).length + "VALUE: " + String.format("%.2f", AssetManager.getAssetManager().getAsset(selected.getName())) + "\n" +
+                                            selected.getDescription()
+                            );
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
                         // Uppdatera grafen
                         chartPanel.updateData(selected.getPriceHistory());
+                        mainContentPanel.revalidate();
+                        mainContentPanel.repaint();
                     }
                 }
             }
@@ -331,7 +343,7 @@ public class StockMarketGUI extends JFrame {
                     @Override
                     public void run() {
                         if (Objects.equals(statusLabel.getText(), statusText)) {
-                            statusLabel.setText(null);
+                            statusLabel.setText(" ");
                         }
                     }
                 },
