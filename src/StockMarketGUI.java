@@ -249,13 +249,24 @@ public class StockMarketGUI extends JFrame {
                     if (selected != null) {
                         // Uppdatera texten
                         try {
+                            ArrayList<Asset> userAsset = AssetManager.getAssetManager().getUserAsset(selected.getName());
+
+                            Double amountOwned = 0.0;
+                            Double ownedValue = 0.0;
+
+                            if (!userAsset.isEmpty()) {
+                                amountOwned = (double) userAsset.size();
+                                ownedValue = amountOwned * selected.getPrice();
+                            }
+
                             detailsArea.setText(
                                     "ENTITY: " + selected.getName() + "\n\n" +
-                                            "PRICE: $" + String.format("%.2f", selected.getPrice()) + "\n" +
                                             "MARKET CAP: $" + String.format("%.2f", selected.getPrice() * selected.getTotalAmount()) + "\n" +
+                                            "PRICE: $" + String.format("%.2f", selected.getPrice()) + "\n" +
                                             "TOTAL AMOUNT: " + String.format("%.2f", selected.getTotalAmount()) + "\n" +
-                                            "BUYABLE AMOUNT: " + String.format("%.2f", selected.getAmountLeft()) + "\n\n" +
-                                            "AMOUNT OWNED: " + AssetManager.getAssetManager().getAsset(selected.getName()).length + "VALUE: " + String.format("%.2f", AssetManager.getAssetManager().getAsset(selected.getName())) + "\n" +
+                                            "BUYABLE AMOUNT: " + String.format("%.2f", selected.getAmountLeft()) + "\n" +
+                                            "AMOUNT OWNED: " + amountOwned + "\n" +
+                                            "OWNED VALUE: $" + String.format("%.2f", ownedValue) + "\n" +
                                             selected.getDescription()
                             );
                         } catch (Exception ex) {

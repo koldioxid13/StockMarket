@@ -51,16 +51,17 @@ public final class AssetManager {
                     asset.setTradable(results.getFirst());
                 }
             }
-            this.assets.set(i, asset);
+            this.assets.add(asset);
         }
     }
 
     public ArrayList<Asset> getUserAsset(String wantedAsset) throws Exception {
         ArrayList<Asset> allAssets = getUserAssets();
         ArrayList<Asset> wantedAssets = new ArrayList<>();
+
         for (int i = 0; i < allAssets.size(); i++) {
             if (allAssets.get(i).getTradable().getName().equals(wantedAsset)) {
-                wantedAssets.set(i, allAssets.get(i));
+                wantedAssets.add(allAssets.get(i));
             }
         }
         return wantedAssets;
@@ -69,6 +70,11 @@ public final class AssetManager {
     public ArrayList<Asset> getUserAssets() throws Exception {
         ArrayList<Asset> allAssets = getAssets();
         ArrayList<Asset> wantedAssets = new ArrayList<>();
+
+        if (allAssets == null) {
+            return wantedAssets;
+        }
+
         for (int i = 0; i < allAssets.size(); i++) {
             if (allAssets.get(i).getUser().equals(UserManager.getUserManager().getCurrentUser().getUserName())) {
                 wantedAssets.set(i, allAssets.get(i));
